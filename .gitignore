@@ -1,0 +1,50 @@
+## Compilação
+bin/
+obj/
+*.dll
+*.exe
+
+## Visual Studio
+.vscode/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Build e publicação
+*.log
+*.pdb
+*.cache
+*.dbmdl
+*.bak
+*.backup
+
+## Sistema e ambiente
+Thumbs.db
+Desktop.ini
+.env
+.env.*  # Se usar múltiplos arquivos de configuração de ambiente
+*.swp
+*.DS_Store
+
+## Pacotes NuGet locais
+*.nupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+
+## Configurações de IDE (JetBrains, Rider, etc.)
+.idea/
+*.iml
+
+## Logs
+logs/
+*.log
+
+## EF Core Migrations (caso queira ignorar binários gerados)
+Migrations/*Designer.cs
+Migrations/*Snapshot.cs
+
+## Docker
+docker-compose.override.yml

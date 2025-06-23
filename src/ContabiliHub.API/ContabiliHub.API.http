@@ -1,0 +1,6 @@
+@ContabiliHub.API_HostAddress = http://localhost:5129
+
+GET {{ContabiliHub.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
