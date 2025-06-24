@@ -1,8 +1,9 @@
 using ContabiliHub.Application.Interfaces;
+using ContabiliHub.Application.Mappings;
 using ContabiliHub.Application.Services;
 using ContabiliHub.Domain.Repositories;
 using ContabiliHub.Infrastructure.Data;
-using ContabiliHub.Infrastructure.Respositories;
+using ContabiliHub.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -16,12 +17,16 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 //Injeção de dependência
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
+builder.Services.AddScoped<IServicoPrestadoRepository, ServicoPrestadoRepository>();
+builder.Services.AddScoped<IServicoPrestadoService, ServicoPrestadoService>();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAutoMapper(typeof(ServicoPrestadoProfile));
+
 
 var app = builder.Build();
 

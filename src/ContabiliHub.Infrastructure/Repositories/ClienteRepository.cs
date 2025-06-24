@@ -3,7 +3,7 @@ using ContabiliHub.Domain.Repositories;
 using ContabiliHub.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace ContabiliHub.Infrastructure.Respositories
+namespace ContabiliHub.Infrastructure.Repositories
 {
     public class ClienteRepository : IClienteRepository
     {
