@@ -1,3 +1,5 @@
+using AutoMapper;
+using ContabiliHub.Application.DTOs;
 using ContabiliHub.Application.Interfaces;
 using ContabiliHub.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -9,43 +11,62 @@ namespace ContabiliHub.API.Controllers
     public class ServicosPrestadosController : ControllerBase
     {
         private readonly IServicoPrestadoService _servico;
+        private readonly IMapper _mapper;
 
-        public ServicosPrestadosController(IServicoPrestadoService servico)
+        public ServicosPrestadosController(IServicoPrestadoService servico, IMapper mapper)
         {
             _servico = servico;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ServicoPrestado>>> GetAll()
+        public async Task<ActionResult<IEnumerable<ServicoPrestadoReadDto>>> GetAll()
         {
             var servicos = await _servico.ObterTodosAsync();
-            return Ok(servicos);
+            var servicosDtos = _mapper.Map<IEnumerable<ServicoPrestadoReadDto>>(servicos);
+            return Ok(servicosDtos);
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<ServicoPrestado>> GetById(Guid id)
+        public async Task<ActionResult<ServicoPrestadoReadDto>> GetById(Guid id)
         {
             var servico = await _servico.ObterPorIdAsync(id);
             if (servico == null)
                 return NotFound();
 
-            return Ok(servico);
+            var servicoDto = _mapper.Map<ServicoPrestadoReadDto>(servico);
+            return Ok(servicoDto);
         }
 
         [HttpGet("cliente/{clienteId:guid}")]
-        public async Task<ActionResult<IEnumerable<ServicoPrestado>>> GetByClienteId(Guid clienteId)
+        public async Task<ActionResult<IEnumerable<ServicoPrestadoReadDto>>> GetByClienteId(Guid clienteId)
         {
             var servicos = await _servico.ObterPorClienteIdAsync(clienteId);
-            return Ok(servicos);
+            var servicosDtos = _mapper.Map<IEnumerable<ServicoPrestadoReadDto>>(servicos);
+            return Ok(servicosDtos);
+        }
+
+        [HttpGet("{id:guid}/recibo")]
+        public async Task<ActionResult<ReciboDto>> EmitirRecibo(Guid id)
+        {
+            var servico = await _servico.ObterPorIdAsync(id);
+
+            if (servico == null)
+                return NotFound(new { message = "Serviço não encontrado." });
+
+            var recibo = _mapper.Map<ReciboDto>(servico);
+            return Ok(recibo);
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create([FromBody] ServicoPrestado servico)
+        public async Task<ActionResult> Create([FromBody] ServicoPrestadoCreateDto dto)
         {
             try
             {
+                var servico = _mapper.Map<ServicoPrestado>(dto);
                 await _servico.AdicionarAsync(servico);
-                return CreatedAtAction(nameof(GetById), new { id = servico.Id }, servico);
+                var readDto = _mapper.Map<ServicoPrestadoReadDto>(servico);
+                return CreatedAtAction(nameof(GetById), new { id = servico.Id }, readDto);
             }
             catch (InvalidOperationException ex)
             {
@@ -54,10 +75,13 @@ namespace ContabiliHub.API.Controllers
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<ActionResult> Update(Guid id, [FromBody] ServicoPrestado servico)
+        public async Task<ActionResult> Update(Guid id, [FromBody] ServicoPrestadoCreateDto dto)
         {
-            if (id != servico.Id)
+            if (id == Guid.Empty)
                 return BadRequest("O ID do serviço não corresponde ao ID fornecido na URL.");
+
+            var servico = _mapper.Map<ServicoPrestado>(dto);
+            servico.Id = id;
 
             try
             {
