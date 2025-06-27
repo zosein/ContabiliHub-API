@@ -1,12 +1,14 @@
 using ContabiliHub.Application.Interfaces;
 using ContabiliHub.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ContabiliHub.API.Controllers
 {
 
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] // Protege todos os endpoints deste controller
     public class ClientesController : ControllerBase
     {
         private readonly IClienteService _clienteService;
