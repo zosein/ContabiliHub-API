@@ -8,39 +8,103 @@ using ContabiliHub.Application.Validators;
 using FluentValidation.AspNetCore;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Security.Cryptography.Xml;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 //Conexão com SQL Server
-
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-//Injeção de dependência
+//Injeção de dependência - Repositórios
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
-builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IServicoPrestadoRepository, ServicoPrestadoRepository>();
-builder.Services.AddScoped<IServicoPrestadoService, ServicoPrestadoService>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+//Injeção de dependência - Serviços
+builder.Services.AddScoped<IClienteService, ClienteService>();
+builder.Services.AddScoped<IServicoPrestadoService, ServicoPrestadoService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+
+// Configuração do JWT
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtIssuer,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
+        ClockSkew = TimeSpan.Zero // Remove delay padrão de 5 minutos
+    };
+});
+
+builder.Services.AddAuthorization();
+
+// Controllers e APIs
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "ContabiliHub API", Version = "v1" });
+
+    // Configuração para autenticação JWT no Swagger
+    c.AddSecurityDefinition("Bearer", new()
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Insira o token JWT no formato: Bearer {seu_token}"
+    });
+
+    c.AddSecurityRequirement(new()
+    {
+        {
+            new()
+            {
+                Reference = new()
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+// Configuração do AutoMapper
 builder.Services.AddAutoMapper(typeof(ServicoPrestadoProfile));
+
+// Configuração do FluentValidation
 builder.Services
     .AddFluentValidationAutoValidation()
     .AddFluentValidationClientsideAdapters();
 
 builder.Services.AddValidatorsFromAssemblyContaining<ServicoPrestadoCreateDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<UsuarioLoginDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<UsuarioRegisterDtoValidator>();
 
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-//Swagger em desenvolvimento
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -48,8 +112,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Middleware de autenticação e autorização (ordem importante!)
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
 
