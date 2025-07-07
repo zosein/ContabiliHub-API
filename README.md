@@ -1,4 +1,4 @@
-# 🧾 ContabiliHub
+#  ContabiliHub
 
 ![.NET 8](https://img.shields.io/badge/.NET-8.0-blueviolet)
 ![Arquitetura em Camadas](https://img.shields.io/badge/Clean%20Architecture-✔️-brightgreen)
@@ -8,7 +8,7 @@
 
 
 
-## ✨ Visão Geral
+## > Visão Geral
 
 O **ContabiliHub** é um sistema de apoio à gestão contábil voltado para contadores autônomos. Permite:
 - Cadastro e gerenciamento de clientes
@@ -20,7 +20,7 @@ Tudo em um ambiente seguro, moderno e 100% baseado em APIs RESTful.
 
 ---
 
-## 🚀 Tecnologias Utilizadas
+## > Tecnologias Utilizadas
 
 - **.NET 8** + C#
 - **Entity Framework Core** (ORM)
@@ -33,7 +33,7 @@ Tudo em um ambiente seguro, moderno e 100% baseado em APIs RESTful.
 
 ---
 
-## 🏛️ Padrões Arquiteturais
+## > Padrões Arquiteturais
 
 ```
 src/
@@ -50,7 +50,7 @@ src/
 
 ---
 
-## ⚙️ Funcionalidades
+## > Funcionalidades
 
 - 🔐 **Autenticação JWT** (registro, login, proteção de rotas)
 - 👥 **Gestão de Clientes** (CRUD completo)
@@ -61,16 +61,16 @@ src/
 
 ---
 
-## 🧰 Pré-requisitos
+## > Pré-requisitos
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [SQL Server LocalDB ou Express](https://www.microsoft.com/pt-br/sql-server/sql-server-downloads)
-- (opcional) [Docker](https://www.docker.com/) *(para futuro uso)*
-- (opcional) [Visual Studio Code](https://code.visualstudio.com/) ou IDE de sua preferência
+- .NET 8 SDK
+- SQL Server LocalDB ou Express
+- Docker *(para futuro uso)*
+- Visual Studio, VS Code ou IDE de sua preferência
 
 ---
 
-## 🚗 Como Executar o Projeto
+## > Como Executar o Projeto
 
 ```bash
 # Clone o repositório
@@ -92,7 +92,7 @@ dotnet run --project src/ContabiliHub.API
 
 ---
 
-## 💻 Exemplos de Uso
+## > Exemplos de Uso
 
 ### 1. Registro de Usuário
 
@@ -166,14 +166,14 @@ Authorization: Bearer <jwt_token>
 
 ---
 
-## 📚 Documentação Interativa
+## > Documentação Interativa
 
 Acesse o **Swagger UI** para explorar e testar todos os endpoints:
 - [https://localhost:7165/swagger](https://localhost:7165/swagger)
 
 ---
 
-## 📝 Roadmap / TODO
+## > Roadmap / TODO
 
 - [ ] Testes unitários automatizados
 - [ ] Dockerfile e docker-compose
@@ -183,7 +183,7 @@ Acesse o **Swagger UI** para explorar e testar todos os endpoints:
 
 ---
 
-## 🤝 Contribuindo
+## > Contribuindo
 
 - Siga o padrão de arquitetura do projeto
 - Sempre crie uma interface antes da implementação de serviço/repositório
@@ -193,7 +193,7 @@ Acesse o **Swagger UI** para explorar e testar todos os endpoints:
 
 ---
 
-## 📄 Licença
+## > Licença
 
 Este projeto está licenciado sob os termos da [MIT License](LICENSE).
 
