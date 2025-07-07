@@ -1,5 +1,6 @@
 using ContabiliHub.Application.DTOs;
 using ContabiliHub.Application.Interfaces;
+using ContabiliHub.Application.Validators;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ContabiliHub.API.Controllers
@@ -9,10 +10,14 @@ namespace ContabiliHub.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUsuarioService _usuarioService;
+        private readonly IValidator<UsuarioRegisterDto> _registerValidator;
+        private readonly IValidator<UsuarioLoginDto> _loginValidator;
 
-        public AuthController(IUsuarioService usuarioService)
+        public AuthController(IUsuarioService usuarioService, IValidator<UsuarioRegisterDto> registerValidator, IValidator<UsuarioLoginDto> loginValidator)
         {
             _usuarioService = usuarioService;
+            _registerValidator = registerValidator;
+            _loginValidator = loginValidator;
         }
 
         /// <summary>
@@ -23,20 +28,26 @@ namespace ContabiliHub.API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult> Register([FromBody] UsuarioRegisterDto dto)
         {
+            //Validação usando sistema nativo
+            var validationResult = _registerValidator.Validate(dto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new
+                {
+                    message = "Dados inválidos.",
+                    errors = validationResult.Errors
+                });
+            }
+
             try
             {
                 var usuario = await _usuarioService.RegistrarAsync(dto);
 
-                var resposta = new
-                {
-                    Id = usuario.Id,
-                    NomeCompleto = usuario.NomeCompleto,
-                    Email = usuario.Email,
-                    CriadoEm = usuario.CriadoEm,
-                    Message = "Usuário registrado com sucesso."
-                };
-
-                return CreatedAtAction(nameof(Register), new { id = usuario.Id }, resposta);
+                return CreatedAtAction(
+                     nameof(Register),
+                     new { id = usuario.Id },
+                     new { message = "Usuário registrado com sucesso.", usuario.Email }
+                );
             }
 
             catch (InvalidOperationException ex)
@@ -58,19 +69,22 @@ namespace ContabiliHub.API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult> Login([FromBody] UsuarioLoginDto dto)
         {
+            // Validação usando sistema nativo
+            var validationResult = _loginValidator.Validate(dto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new
+                {
+                    message = "Dados inválidos.",
+                    errors = validationResult.Errors
+                });
+            }
+
             try
             {
                 var token = await _usuarioService.LoginAsync(dto);
 
-                var resposta = new
-                {
-                    Toke = token,
-                    TokenType = "Bearer",
-                    ExpiresIn = "6h",
-                    Message = "Login realizado com sucesso."
-                };
-
-                return Ok(resposta);
+                return Ok(new { token, message = "Login realizado com sucesso." });
             }
 
             catch (UnauthorizedAccessException ex)

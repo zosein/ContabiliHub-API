@@ -1,7 +1,6 @@
-using AutoMapper;
 using ContabiliHub.Application.DTOs;
 using ContabiliHub.Application.Interfaces;
-using ContabiliHub.Domain.Entities;
+using ContabiliHub.Application.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -13,19 +12,18 @@ namespace ContabiliHub.API.Controllers
     public class ServicosPrestadosController : ControllerBase
     {
         private readonly IServicoPrestadoService _servico;
-        private readonly IMapper _mapper;
-
-        public ServicosPrestadosController(IServicoPrestadoService servico, IMapper mapper)
+        private readonly IValidator<ServicoPrestadoCreateDto> _validator;
+        public ServicosPrestadosController(IServicoPrestadoService servico, IValidator<ServicoPrestadoCreateDto> validator)
         {
             _servico = servico;
-            _mapper = mapper;
+            _validator = validator;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ServicoPrestadoReadDto>>> GetAll()
         {
             var servicos = await _servico.ObterTodosAsync();
-            var servicosDtos = _mapper.Map<IEnumerable<ServicoPrestadoReadDto>>(servicos);
+            var servicosDtos = servicos.Select(s => new ServicoPrestadoReadDto(s));
             return Ok(servicosDtos);
         }
 
@@ -36,7 +34,7 @@ namespace ContabiliHub.API.Controllers
             if (servico == null)
                 return NotFound();
 
-            var servicoDto = _mapper.Map<ServicoPrestadoReadDto>(servico);
+            var servicoDto = new ServicoPrestadoReadDto(servico);
             return Ok(servicoDto);
         }
 
@@ -44,7 +42,7 @@ namespace ContabiliHub.API.Controllers
         public async Task<ActionResult<IEnumerable<ServicoPrestadoReadDto>>> GetByClienteId(Guid clienteId)
         {
             var servicos = await _servico.ObterPorClienteIdAsync(clienteId);
-            var servicosDtos = _mapper.Map<IEnumerable<ServicoPrestadoReadDto>>(servicos);
+            var servicosDtos = servicos.Select(s => new ServicoPrestadoReadDto(s));
             return Ok(servicosDtos);
         }
 
@@ -56,18 +54,30 @@ namespace ContabiliHub.API.Controllers
             if (servico == null)
                 return NotFound(new { message = "Serviço não encontrado." });
 
-            var recibo = _mapper.Map<ReciboDto>(servico);
+            var recibo = new ReciboDto(servico);
             return Ok(recibo);
         }
 
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] ServicoPrestadoCreateDto dto)
         {
+
+            //validação usando sistema nativo
+            var validationResult = _validator.Validate(dto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new
+                {
+                    message = "Dados inválidos.",
+                    errors = validationResult.Errors
+                });
+            }
+
             try
             {
-                var servico = _mapper.Map<ServicoPrestado>(dto);
+                var servico = dto.ToEntity();
                 await _servico.AdicionarAsync(servico);
-                var readDto = _mapper.Map<ServicoPrestadoReadDto>(servico);
+                var readDto = new ServicoPrestadoReadDto(servico);
                 return CreatedAtAction(nameof(GetById), new { id = servico.Id }, readDto);
             }
             catch (InvalidOperationException ex)
@@ -80,15 +90,30 @@ namespace ContabiliHub.API.Controllers
         public async Task<ActionResult> Update(Guid id, [FromBody] ServicoPrestadoCreateDto dto)
         {
             if (id == Guid.Empty)
-                return BadRequest("O ID do serviço não corresponde ao ID fornecido na URL.");
+                return BadRequest("O ID do serviço não pode ser vazio.");
 
-            var servico = _mapper.Map<ServicoPrestado>(dto);
-            servico.Id = id;
+            //validação usando sistema nativo
+            var validationResult = _validator.Validate(dto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new
+                {
+                    message = "Dados inválidos.",
+                    errors = validationResult.Errors
+                });
+            }
 
             try
             {
-                await _servico.AtualizarAsync(servico);
+                var servicoExistente = await _servico.ObterPorIdAsync(id);
+                if (servicoExistente == null)
+                    return NotFound(new { message = "Serviço não encontrado." });
+
+                //Aplicar as alterações do DTO na entidade existente
+                dto.ApplyTo(servicoExistente);
+                await _servico.AtualizarAsync(servicoExistente);
                 return NoContent();
+
             }
             catch (InvalidOperationException ex)
             {
