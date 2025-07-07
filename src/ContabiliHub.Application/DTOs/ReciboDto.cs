@@ -1,12 +1,23 @@
+using ContabiliHub.Domain.Entities;
+
 namespace ContabiliHub.Application.DTOs
 {
-    public class ReciboDto
+    public record ReciboDto(
+        string NomeCliente,
+        string DescricaoServico,
+        decimal Valor,
+        DateTime DataPrestacao,
+        DateTime DataEmissao,
+        string AssinaturaResponsavel = "__________________"
+    )
     {
-        public string NomeCliente { get; set; } = string.Empty;
-        public string DescricaoServico { get; set; } = string.Empty;
-        public decimal Valor { get; set; }
-        public DateTime DataPrestacao { get; set; }
-        public DateTime DataEmissao { get; set; } = DateTime.UtcNow;
-        public string AssinaturaResponsavel { get; set; } = "____________________";
+        public ReciboDto(ServicoPrestado servico) : this(
+            servico.Cliente?.NomeCompleto ?? string.Empty,
+            servico.Descricao,
+            servico.Valor,
+            servico.DataPrestacao,
+            DateTime.UtcNow
+        )
+        { }
     }
 }

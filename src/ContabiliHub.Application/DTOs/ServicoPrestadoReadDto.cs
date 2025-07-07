@@ -1,14 +1,29 @@
+using ContabiliHub.Domain.Entities;
+
 namespace ContabiliHub.Application.DTOs
 {
-    public class ServicoPrestadoReadDto
+    public record ServicoPrestadoReadDto(
+        Guid Id,
+        string Descricao,
+        decimal Valor,
+        DateTime DataPrestacao,
+        bool Pago,
+        Guid ClienteId,
+        string? NomeCliente
+    )
     {
-        public Guid Id { get; set; }
-        public string Descricao { get; set; } = string.Empty;
-        public decimal Valor { get; set; }
-        public DateTime DataPrestacao { get; set; }
-        public bool Pago { get; set; }
-
-        public Guid ClienteId { get; set; }
-        public string? NomeCliente { get; set; }
+        //Construtor para conversão direta da entidade
+        public ServicoPrestadoReadDto(ServicoPrestado servico)
+            : this(
+                servico.Id,
+                servico.Descricao,
+                servico.Valor,
+                servico.DataPrestacao,
+                servico.Pago,
+                servico.ClienteId,
+                servico.Cliente?.NomeCompleto
+            )
+        {
+        }
     }
 }

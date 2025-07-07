@@ -1,9 +1,14 @@
+using ContabiliHub.Domain.Entities;
+
 namespace ContabiliHub.Application.DTOs
 {
-    public class UsuarioRegisterDto
+    public record UsuarioRegisterDto(string NomeCompleto, string Email, string Senha)
     {
-        public string NomeCompleto { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Senha { get; set; } = string.Empty;
+        public Usuario ToEntity(string senhaHash) => new()
+        {
+            NomeCompleto = this.NomeCompleto,
+            Email = this.Email,
+            SenhaHash = senhaHash
+        };
     }
 }
