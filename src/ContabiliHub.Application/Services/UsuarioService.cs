@@ -29,13 +29,7 @@ namespace ContabiliHub.Application.Services
                 throw new InvalidOperationException("E-mail já está em uso.");
 
             var senhaHash = HashSenha(dto.Senha);
-
-            var usuario = new Usuario
-            {
-                NomeCompleto = dto.NomeCompleto,
-                Email = dto.Email,
-                SenhaHash = senhaHash
-            };
+            var usuario = dto.ToEntity(senhaHash);
 
             await _usuarioRepository.AdicionarAsync(usuario);
             return usuario;
