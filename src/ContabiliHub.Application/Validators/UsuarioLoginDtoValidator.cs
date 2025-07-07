@@ -1,19 +1,30 @@
+using System.Text.RegularExpressions;
 using ContabiliHub.Application.DTOs;
-using FluentValidation;
 
 namespace ContabiliHub.Application.Validators
 {
-    public class UsuarioLoginDtoValidator : AbstractValidator<UsuarioLoginDto>
+    public class UsuarioLoginDtoValidator : IValidator<UsuarioLoginDto>
     {
-        public UsuarioLoginDtoValidator()
-        {
-            RuleFor(u => u.Email)
-                .NotEmpty().WithMessage("E-mail é obrigatório.")
-                .EmailAddress().WithMessage("E-mail deve ter um formato válido.");
+        private static readonly Regex EmailRegex = new(
+            @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+            RegexOptions.Compiled
+        );
 
-            RuleFor(u => u.Senha)
-                .NotEmpty().WithMessage("Senha é obrigatória.")
-                .MinimumLength(6).WithMessage("Senha deve ter pelo menos 6 caracteres.");
+        public ValidationResult Validate(UsuarioLoginDto dto)
+        {
+            var errors = new List<string>();
+
+            if (string.IsNullOrWhiteSpace(dto.Email))
+                errors.Add("E-mail é obrigatório.");
+            else if (!EmailRegex.IsMatch(dto.Email))
+                errors.Add("E-mail deve ter um formato válido.");
+
+            if (string.IsNullOrWhiteSpace(dto.Senha))
+                errors.Add("Senha é obrigatória.");
+
+            return errors.Count == 0
+                ? ValidationResult.Success()
+                : ValidationResult.Failure(errors);
         }
     }
 }

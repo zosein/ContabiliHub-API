@@ -1,28 +1,37 @@
+using System.Text.RegularExpressions;
 using ContabiliHub.Application.DTOs;
-using FluentValidation;
 
 namespace ContabiliHub.Application.Validators
 {
-    public class UsuarioRegisterDtoValidator : AbstractValidator<UsuarioRegisterDto>
+    public class UsuarioRegisterDtoValidator : IValidator<UsuarioRegisterDto>
     {
-        public UsuarioRegisterDtoValidator()
+        private static readonly Regex EmailRegex = new(
+            @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+            RegexOptions.Compiled
+        );
+
+        public ValidationResult Validate(UsuarioRegisterDto dto)
         {
-            RuleFor(u => u.NomeCompleto)
-                .NotEmpty().WithMessage("Nome completo é obrigatório.")
-                .MinimumLength(3).WithMessage("Nome completo deve ter pelo menos 3 caracteres.")
-                .MaximumLength(100).WithMessage("Nome completo não pode ter mais de 100 caracteres.");
+            var errors = new List<string>();
 
-            RuleFor(u => u.Email)
-                .NotEmpty().WithMessage("E-mail é obrigatório.")
-                .EmailAddress().WithMessage("E-mail deve ter um formato válido.")
-                .MaximumLength(100).WithMessage("E-mail não pode ter mais de 100 caracteres.");
+            if (string.IsNullOrWhiteSpace(dto.NomeCompleto))
+                errors.Add("Nome completo é obrigatório.");
+            else if (dto.NomeCompleto.Length < 2)
+                errors.Add("Nome completo deve ter pelo menos 2 caracteres.");
 
-            RuleFor(u => u.Senha)
-                .NotEmpty().WithMessage("Senha é obrigatória.")
-                .MinimumLength(6).WithMessage("Senha deve ter pelo menos 6 caracteres.")
-                .MaximumLength(50).WithMessage("Senha não pode ter mais de 50 caracteres.")
-                .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)")
-                .WithMessage("Senha deve conter pelo menos uma letra maiúscula, uma letra minúscula e um número.");
+            if (string.IsNullOrWhiteSpace(dto.Email))
+                errors.Add("E-mail é obrigatório.");
+            else if (!EmailRegex.IsMatch(dto.Email))
+                errors.Add("E-mail deve ter um formato válido.");
+
+            if (string.IsNullOrWhiteSpace(dto.Senha))
+                errors.Add("Senha é obrigatória.");
+            else if (dto.Senha.Length < 6)
+                errors.Add("Senha deve ter pelo menos 6 caracteres.");
+
+            return errors.Count == 0
+                ? ValidationResult.Success()
+                : ValidationResult.Failure(errors);
         }
     }
 }

@@ -1,27 +1,30 @@
-using System.Data;
 using ContabiliHub.Application.DTOs;
-using FluentValidation;
 
 namespace ContabiliHub.Application.Validators
 {
-    public class ServicoPrestadoCreateDtoValidator : AbstractValidator<ServicoPrestadoCreateDto>
+    public class ServicoPrestadoCreateDtoValidator : IValidator<ServicoPrestadoCreateDto>
     {
-        public ServicoPrestadoCreateDtoValidator()
+        public ValidationResult Validate(ServicoPrestadoCreateDto dto)
         {
-            RuleFor(s => s.ClienteId)
-                .NotEmpty().WithMessage("ClienteId é obrigatório.")
-                .NotEqual(Guid.Empty).WithMessage("ClienteId não pode ser um Guid.Empty.");
+            var errors = new List<string>();
 
-            RuleFor(s => s.Descricao)
-                .NotEmpty().WithMessage("Descrição é obrigatória.")
-                .MinimumLength(5).WithMessage("Descrição deve ter pelo menos 5 caracteres.")
-                .MaximumLength(200).WithMessage("Descrição não pode ter mais de 200 caracteres.");
+            if (dto.ClienteId == Guid.Empty)
+                errors.Add("ClinteId é obrigatório e não pode ser vazio.");
 
-            RuleFor(s => s.Valor)
-                .GreaterThan(0).WithMessage("Valor deve ser maior que zero.");
+            if (string.IsNullOrWhiteSpace(dto.Descricao))
+                errors.Add("Descrição é obrigatória.");
+            else if (dto.Descricao.Length < 5 || dto.Descricao.Length > 200)
+                errors.Add("Descrição deve ter entre 5 e 200 caracteres.");
 
-            RuleFor(s => s.DataPrestacao)
-                .LessThanOrEqualTo(DateTime.Now).WithMessage("Data não pode ser futura.");
+            if (dto.Valor <= 0)
+                errors.Add("Valor deve ser maior que zero.");
+
+            if (dto.DataPrestacao > DateTime.Now)
+                errors.Add("Data de prestação não pode ser futura.");
+
+            return errors.Count == 0
+                ? ValidationResult.Success()
+                : ValidationResult.Failure(errors);
         }
     }
 }
