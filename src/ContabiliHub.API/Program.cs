@@ -1,17 +1,14 @@
 using ContabiliHub.Application.Interfaces;
-using ContabiliHub.Application.Mappings;
 using ContabiliHub.Application.Services;
+using ContabiliHub.Application.Validators;
+using ContabiliHub.Application.DTOs;
 using ContabiliHub.Domain.Repositories;
 using ContabiliHub.Infrastructure.Data;
 using ContabiliHub.Infrastructure.Repositories;
-using ContabiliHub.Application.Validators;
-using FluentValidation.AspNetCore;
-using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using System.Security.Cryptography.Xml;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +26,11 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IServicoPrestadoService, ServicoPrestadoService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+
+// Injeção de dependência - Validadores nativos
+builder.Services.AddScoped<IValidator<ServicoPrestadoCreateDto>, ServicoPrestadoCreateDtoValidator>();
+builder.Services.AddScoped<IValidator<UsuarioLoginDto>, UsuarioLoginDtoValidator>();
+builder.Services.AddScoped<IValidator<UsuarioRegisterDto>, UsuarioRegisterDtoValidator>();
 
 // Configuração do JWT
 var jwtKey = builder.Configuration["Jwt:Key"];
@@ -89,17 +91,6 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-// Configuração do AutoMapper
-builder.Services.AddAutoMapper(typeof(ServicoPrestadoProfile));
-
-// Configuração do FluentValidation
-builder.Services
-    .AddFluentValidationAutoValidation()
-    .AddFluentValidationClientsideAdapters();
-
-builder.Services.AddValidatorsFromAssemblyContaining<ServicoPrestadoCreateDtoValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<UsuarioLoginDtoValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<UsuarioRegisterDtoValidator>();
 
 
 var app = builder.Build();
