@@ -6,15 +6,12 @@
 ![JWT Auth](https://img.shields.io/badge/JWT%20Auth-✔️-orange)
 ![Status](https://img.shields.io/badge/status-Em%20Desenvolvimento-yellow)
 
+Sistema de apoio à gestão contábil para contadores autônomos, permitindo cadastro de clientes, registro de serviços (como IR), emissão de recibos e controle de honorários.
 
-
+---
 ## > Visão Geral
 
-O **ContabiliHub** é um sistema de apoio à gestão contábil voltado para contadores autônomos. Permite:
-- Cadastro e gerenciamento de clientes
-- Registro de serviços prestados (ex: IR)
-- Emissão de recibos digitais
-- Controle básico de honorários
+O **ContabiliHub** é uma API para gestão de clientes e serviços contábeis, focada na produtividade do contador autônomo. Proporciona controle centralizado de clientes, serviços prestados, autenticação segura, emissão de recibos e histórico de operações.
 
 Tudo em um ambiente seguro, moderno e 100% baseado em APIs RESTful.
 
@@ -22,14 +19,12 @@ Tudo em um ambiente seguro, moderno e 100% baseado em APIs RESTful.
 
 ## > Tecnologias Utilizadas
 
-- **.NET 8** + C#
+- **.NET 8** (C#)
 - **Entity Framework Core** (ORM)
-- **SQL Server** (persistência)
-- **JWT** para autenticação
-- **Swagger/OpenAPI** para documentação interativa
-- **Arquitetura em Camadas (Clean Architecture)**
-- **Docker** *(planejado)*
-- **SHA256** para hash de senhas
+- **SQL Server** (Banco de Dados)
+- **JWT** (Autenticação)
+- **Swagger / OpenAPI** (Documentação)
+- **Clean Architecture** (Separação de responsabilidades)
 
 ---
 
@@ -43,10 +38,10 @@ src/
 ├── ContabiliHub.API/            # Controllers, configuração API
 ```
 
-- **Domain**: Somente entidades e contratos (sem dependências externas)
-- **Application**: DTOs, lógica de negócio, interfaces de serviço, validadores
-- **Infrastructure**: Implementação de acesso a dados (EF Core)
-- **API**: Camada web, autenticação, controllers (usam apenas DTOs)
+- **Domain:** Entidades puras e contratos (sem dependência de infraestrutura)
+- **Application:** DTOs, regras de negócio, interfaces de serviços
+- **Infrastructure:** Implementação de acesso a dados, EF Core, repositórios
+- **API:** Controllers, autenticação, injeção de dependências, documentação
 
 ---
 
@@ -74,7 +69,7 @@ src/
 
 ```bash
 # Clone o repositório
-git clone https://github.com/zosein/ContabiliHub.git
+git clone https://github.com/zosein/ContabiliHub-API.git
 cd ContabiliHub
 
 # Restaure as dependências
