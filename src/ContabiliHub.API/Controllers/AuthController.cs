@@ -1,6 +1,7 @@
 using ContabiliHub.Application.DTOs;
 using ContabiliHub.Application.Interfaces;
 using ContabiliHub.Application.Validators;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ContabiliHub.API.Controllers
@@ -103,6 +104,7 @@ namespace ContabiliHub.API.Controllers
         /// </summary>
         /// <returns>Status de validação do token</returns>
         [HttpGet("validate")]
+        [Authorize]
         public ActionResult ValidateToken()
         {
             // Se chegou ate aqui, o token é válido (middleware já validou)
