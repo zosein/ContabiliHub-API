@@ -2,6 +2,7 @@ using ContabiliHub.Application.Interfaces;
 using ContabiliHub.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using ContabiliHub.Application.DTOs;
 
 namespace ContabiliHub.API.Controllers
 {
@@ -19,50 +20,64 @@ namespace ContabiliHub.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Cliente>>> GetAll()
+        public async Task<ActionResult<IEnumerable<ClienteReadDto>>> GetAll()
         {
             var clientes = await _clienteService.ObterTodosAsync();
-            return Ok(clientes);
+            var resultado = clientes.Select(ClienteReadDto.FromEntity);
+            return Ok(resultado);
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<Cliente>> GetById(Guid id)
+        public async Task<ActionResult<ClienteReadDto>> GetById(Guid id)
         {
             var cliente = await _clienteService.ObterPorIdAsync(id);
             if (cliente == null)
-                return NotFound();
+                return NotFound(new { message = "Cliente não encontrado." });
 
-            return Ok(cliente);
+            return Ok(ClienteReadDto.FromEntity(cliente));
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create([FromBody] Cliente cliente)
+        public async Task<ActionResult> Create([FromBody] ClienteCreateDto clienteDto)
         {
-            try
+            var cliente = new Cliente
             {
-                await _clienteService.AdicionarAsync(cliente);
-                return CreatedAtAction(nameof(GetById), new { id = cliente.Id }, cliente);
-            }
+                NomeCompleto = clienteDto.NomeCompleto,
+                CPF = clienteDto.Cpf,
+                Email = clienteDto.Email,
+                Telefone = clienteDto.Telefone,
+                Endereco = clienteDto.Endereco
+            };
 
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
+            await _clienteService.AdicionarAsync(cliente);
+
+            var lerDto = ClienteReadDto.FromEntity(cliente);
+            return CreatedAtAction(nameof(GetById), new { id = cliente.Id }, lerDto);
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<ActionResult> Update(Guid id, [FromBody] Cliente cliente)
+        public async Task<ActionResult> Update(Guid id, [FromBody] ClienteUpdateDto clienteDto)
         {
-            if (id != cliente.Id)
-                return BadRequest("ID do cliente não corresponde.");
+            var existente = await _clienteService.ObterPorIdAsync(id);
+            if (existente == null)
+                return NotFound(new { message = "Cliente não encontrado." });
 
-            await _clienteService.AtualizarAsync(cliente);
+            existente.NomeCompleto = clienteDto.NomeCompleto;
+            existente.Email = clienteDto.Email;
+            existente.Telefone = clienteDto.Telefone;
+            existente.Endereco = clienteDto.Endereco;
+
+            await _clienteService.AtualizarAsync(existente);
             return NoContent();
         }
 
         [HttpDelete("{id:guid}")]
         public async Task<ActionResult> Delete(Guid id)
         {
+
+            var existente = await _clienteService.ObterPorIdAsync(id);
+            if (existente == null)
+                return NotFound(new { message = "Cliente não encontrado." });
 
             await _clienteService.RemoverAsync(id);
             return NoContent();
