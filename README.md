@@ -42,6 +42,14 @@ src/
 - **Application:** DTOs, regras de negócio, interfaces de serviços
 - **Infrastructure:** Implementação de acesso a dados, EF Core, repositórios
 - **API:** Controllers, autenticação, injeção de dependências, documentação
+---
+## > Casos de Uso 
+
+1. Contador registra-se → obtém token JWT
+2. Cadastra clientes → valida CPF único
+3. Registra serviços prestados → vincula ao cliente
+4. Emite recibos digitais → para envio/impressão
+5. Controla status de pagamento → gestão financeira
 
 ---
 
@@ -166,15 +174,23 @@ Authorization: Bearer <jwt_token>
 Acesse o **Swagger UI** para explorar e testar todos os endpoints:
 - [https://localhost:7165/swagger](https://localhost:7165/swagger)
 
+  
+---
+![SwaggerUI](https://i.imgur.com/NPRI2MY.png)
+![SwaggerUI](https://i.imgur.com/sUxpLTc.png)
+![SwaggerUI](https://i.imgur.com/qq6CGYF.png)
+
 ---
 
 ## > Roadmap / TODO
 
-- [ ] Testes unitários automatizados
-- [ ] Dockerfile e docker-compose
-- [ ] Integração com e-mail (envio automático de recibos)
-- [ ] Sistema de agendamento de serviços
-- [ ] Painel web (frontend)
+
+- ✅ API funcionalmente completa
+- 🔄 Testes unitários automatizados
+- 🔄 Containerização Docker
+- 🔄 Integração com e-mail para recibos
+- 🔄 Sistema de agendamento
+- 🔄 Frontend web
 
 ---
 
