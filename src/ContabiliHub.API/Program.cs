@@ -5,6 +5,7 @@ using ContabiliHub.Application.DTOs;
 using ContabiliHub.Domain.Repositories;
 using ContabiliHub.Infrastructure.Data;
 using ContabiliHub.Infrastructure.Repositories;
+using ContabiliHub.API.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -102,15 +103,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-// Middleware de autenticação e autorização (ordem importante!)
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
-
 app.Run();
 
 
