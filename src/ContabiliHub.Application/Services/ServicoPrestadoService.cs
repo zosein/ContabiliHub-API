@@ -1,6 +1,7 @@
 using ContabiliHub.Application.Interfaces;
 using ContabiliHub.Domain.Entities;
 using ContabiliHub.Domain.Repositories;
+using ContabiliHub.Application.DTOs;
 
 namespace ContabiliHub.Application.Services
 {
@@ -28,6 +29,18 @@ namespace ContabiliHub.Application.Services
         public async Task<IEnumerable<ServicoPrestado>> ObterPorClienteIdAsync(Guid clienteId)
         {
             return await _repository.ObterPorClienteIdAsync(clienteId);
+        }
+
+        public async Task<ResultadoPaginado<ServicoPrestado>> ObterTodosPaginadoAsync(int pagina, int paginaTamanho, Guid? clienteId, bool? pago, string? busca)
+        {
+            var (itens, total) = await _repository.ObterTodosPaginadoAsync(pagina, paginaTamanho, clienteId, pago, busca);
+            return new ResultadoPaginado<ServicoPrestado>
+            (
+                itens,
+                pagina,
+                paginaTamanho,
+                total
+            );
         }
 
         public async Task AdicionarAsync(ServicoPrestado servicoPrestado)

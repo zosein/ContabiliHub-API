@@ -20,11 +20,32 @@ namespace ContabiliHub.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ServicoPrestadoReadDto>>> GetAll()
+        public async Task<ActionResult<object>> GetAll(
+            [FromQuery] int pagina = 1,
+            [FromQuery] int paginaTamanho = 10,
+            [FromQuery] Guid? clienteId = null,
+            [FromQuery] bool? pago = null,
+            [FromQuery] string? busca = null)
         {
-            var servicos = await _servico.ObterTodosAsync();
-            var servicosDtos = servicos.Select(s => new ServicoPrestadoReadDto(s));
-            return Ok(servicosDtos);
+            pagina = pagina <= 0 ? 1 : pagina;
+            paginaTamanho = paginaTamanho <= 0 ? 10 : Math.Min(paginaTamanho, 50);
+
+            var paginacao = await _servico.ObterTodosPaginadoAsync(pagina, paginaTamanho, clienteId, pago, busca);
+
+            var itens = paginacao.Itens.Select(s => new ServicoPrestadoReadDto(s));
+
+            return Ok(new
+            {
+                pagina = paginacao.Pagina,
+                paginaTamanho = paginacao.PaginaTamanho,
+                totalItens = paginacao.TotalItens,
+                filtros = new
+                {
+                    clienteId,
+                    pago,
+                    busca
+                }
+            });
         }
 
         [HttpGet("{id:guid}")]
@@ -73,17 +94,10 @@ namespace ContabiliHub.API.Controllers
                 });
             }
 
-            try
-            {
-                var servico = dto.ToEntity();
-                await _servico.AdicionarAsync(servico);
-                var readDto = new ServicoPrestadoReadDto(servico);
-                return CreatedAtAction(nameof(GetById), new { id = servico.Id }, readDto);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+            var servico = dto.ToEntity();
+            await _servico.AdicionarAsync(servico);
+            var lerDto = new ServicoPrestadoReadDto(servico);
+            return CreatedAtAction(nameof(GetById), new { id = servico.Id }, lerDto);
         }
 
         [HttpPut("{id:guid}")]
@@ -103,22 +117,16 @@ namespace ContabiliHub.API.Controllers
                 });
             }
 
-            try
-            {
-                var servicoExistente = await _servico.ObterPorIdAsync(id);
-                if (servicoExistente == null)
-                    return NotFound(new { message = "Serviço não encontrado." });
 
-                //Aplicar as alterações do DTO na entidade existente
-                dto.ApplyTo(servicoExistente);
-                await _servico.AtualizarAsync(servicoExistente);
-                return NoContent();
+            var servicoExistente = await _servico.ObterPorIdAsync(id);
+            if (servicoExistente == null)
+                return NotFound(new { message = "Serviço não encontrado." });
 
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+            //Aplicar as alterações do DTO na entidade existente
+            dto.ApplyTo(servicoExistente);
+            await _servico.AtualizarAsync(servicoExistente);
+            return NoContent();
+
         }
 
         [HttpDelete("{id:guid}")]

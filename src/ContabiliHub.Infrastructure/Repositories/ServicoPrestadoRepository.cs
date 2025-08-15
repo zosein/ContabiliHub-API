@@ -45,7 +45,35 @@ namespace ContabiliHub.Infrastructure.Repositories
         {
             return await _context.ServicosPrestados
                 .Where(s => s.ClienteId == clienteId)
+                .Include(s => s.Cliente)
                 .ToListAsync();
+        }
+
+        public async Task<(IEnumerable<ServicoPrestado> Itens, int Total)> ObterTodosPaginadoAsync(int pagina, int paginaTamanho, Guid? clienteId, bool? pago, string? busca)
+        {
+            var query = _context.ServicosPrestados.AsQueryable();
+
+            if (clienteId.HasValue)
+                query = query.Where(s => s.ClienteId == clienteId.Value);
+
+            if (pago.HasValue)
+                query = query.Where(s => s.Pago == pago.Value);
+
+            if (!string.IsNullOrEmpty(busca))
+                query = query.Where(s => s.Descricao.Contains(busca));
+
+            var total = await query.CountAsync();
+
+            var itens = await query
+                .Include(s => s.Cliente)
+                .OrderByDescending(s => s.DataPrestacao)
+                .Skip((pagina - 1) * paginaTamanho)
+                .Take(paginaTamanho)
+                .ToListAsync();
+
+            return (itens, total);
+
+
         }
 
         public async Task RemoverAsync(Guid id)
