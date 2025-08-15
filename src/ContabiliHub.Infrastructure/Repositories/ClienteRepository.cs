@@ -30,6 +30,10 @@ namespace ContabiliHub.Infrastructure.Repositories
         {
             return await _context.Clientes.AnyAsync(c => c.CPF == cpf);
         }
+        public async Task<bool> ExisteEmailAsync(string email)
+        {
+            return await _context.Clientes.AnyAsync(c => c.Email == email);
+        }
 
         public async Task<Cliente?> ObterPorIdAsync(Guid id)
         {
@@ -38,7 +42,10 @@ namespace ContabiliHub.Infrastructure.Repositories
 
         public async Task<IEnumerable<Cliente>> ObterTodosAsync()
         {
-            return await _context.Clientes.ToListAsync();
+            return await _context.Clientes
+                .OrderBy(c => c.NomeCompleto)
+                .ToListAsync();
+
         }
 
         public async Task RemoverAsync(Guid id)

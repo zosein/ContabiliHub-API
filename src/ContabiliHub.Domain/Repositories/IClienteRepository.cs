@@ -10,5 +10,6 @@ namespace ContabiliHub.Domain.Repositories
         Task AtualizarAsync(Cliente cliente);
         Task RemoverAsync(Guid id);
         Task<bool> ExisteCpfAsync(string cpf);
+        Task<bool> ExisteEmailAsync(string email);
     }
 }
