@@ -1,4 +1,4 @@
-#  ContabiliHub
+# ContabiliHub
 
 ![.NET 8](https://img.shields.io/badge/.NET-8.0-blueviolet)
 ![Arquitetura em Camadas](https://img.shields.io/badge/Clean%20Architecture-✔️-brightgreen)
@@ -9,6 +9,7 @@
 Sistema de apoio à gestão contábil para contadores autônomos, permitindo cadastro de clientes, registro de serviços (como IR), emissão de recibos e controle de honorários.
 
 ---
+
 ## > Visão Geral
 
 O **ContabiliHub** é uma API para gestão de clientes e serviços contábeis, focada na produtividade do contador autônomo. Proporciona controle centralizado de clientes, serviços prestados, autenticação segura, emissão de recibos e histórico de operações.
@@ -42,8 +43,183 @@ src/
 - **Application:** DTOs, regras de negócio, interfaces de serviços
 - **Infrastructure:** Implementação de acesso a dados, EF Core, repositórios
 - **API:** Controllers, autenticação, injeção de dependências, documentação
+
+**Diagrama de classes e sequência:**
+
+> Modelo somente com entidades de domínio
+
+```mermaid
+classDiagram
+    direction LR
+
+    %% Domain Entities
+    class Usuario {
+        +Id
+        +NomeCompleto
+        +Email
+        +SenhaHash
+    }
+
+    class Cliente {
+        +Id
+        +NomeCompleto
+        +CPF
+        +Email
+    }
+
+    class ServicoPrestado {
+        +Id
+        +Descricao
+        +Valor
+        +DataPrestacao
+        +Pago
+    }
+
+    %% Relationships with cardinalities
+    Usuario "1" --> "0..*" Cliente : gerencia
+    Cliente "1" --> "0..*" ServicoPrestado : possui
+    Usuario "1" --> "0..*" ServicoPrestado : registra
+
+```
+
+> Modelo conceitual amplo
+
+```mermaid
+classDiagram
+    %% Domain Entities
+    class Usuario {
+        +Id
+        +NomeCompleto
+        +Email
+        +SenhaHash
+        +CriadoEm
+    }
+
+    class Cliente {
+        +Id
+        +NomeCompleto
+        +CPF
+        +Email
+        +Telefone
+        +Endereco
+        +DataCadastro
+    }
+
+    class ServicoPrestado {
+        +Id
+        +Descricao
+        +Valor
+        +DataPrestacao
+        +Pago
+        +ClienteId
+    }
+
+    %% Application Services
+    class ClienteService {
+        +ObterTodos()
+        +ObterPorId()
+        +Criar()
+        +Atualizar()
+        +Remover()
+    }
+
+    class ServicoPrestadoService {
+        +ObterTodos()
+        +ObterPorId()
+        +ObterPorClienteId()
+        +Criar()
+        +Atualizar()
+        +Remover()
+        +MarcarComoPago()
+    }
+
+    %% DTOs
+    class ClienteReadDto {
+        +Id
+        +NomeCompleto
+        +CPF
+        +Email
+        +Telefone
+        +Endereco
+        +DataCadastro
+    }
+
+    class ClienteCreateDto {
+        +NomeCompleto
+        +CPF
+        +Email
+        +Telefone
+        +Endereco
+    }
+
+    class ServicoPrestadoReadDto {
+        +Id
+        +Descricao
+        +Valor
+        +DataPrestacao
+        +Pago
+        +ClienteId
+        +Cliente
+    }
+
+    %% Relationships with cardinalities
+    Usuario "1" --> "0..*" Cliente : gerencia
+    Cliente "1" --> "0..*" ServicoPrestado : possui
+    Usuario "1" --> "0..*" ServicoPrestado : registra
+
+    ClienteService --> Cliente : gerencia
+    ServicoPrestadoService --> ServicoPrestado : gerencia
+    ServicoPrestadoService --> Cliente : usa
+
+    ClienteReadDto <.. Cliente : representa
+    ClienteCreateDto <.. Cliente : cria
+    ServicoPrestadoReadDto <.. ServicoPrestado : representa
+
+
+```
+
+> Diagrama de sequência com fluxo essencial da API
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Usuario
+    participant Controller
+    participant Service
+    participant Repository
+
+    %% Criar Cliente
+    Usuario->>Controller: Criar Cliente
+    Controller->>Service: Criar Cliente
+    Service->>Repository: Adicionar Cliente
+    Repository-->>Service: Cliente criado
+    Service-->>Controller: Cliente criado
+    Controller-->>Usuario: 201 Created
+
+    %% Listar Serviços de um Cliente
+    Usuario->>Controller: Obter Serviços de Cliente
+    Controller->>Service: Obter Serviços
+    Service->>Repository: Buscar Serviços
+    Repository-->>Service: Lista de Serviços
+    Service-->>Controller: Lista de Serviços
+    Controller-->>Usuario: 200 OK
+
+    %% Marcar Serviço como Pago
+    Usuario->>Controller: Marcar Serviço como Pago
+    Controller->>Service: Marcar Serviço como Pago
+    Service->>Repository: Atualizar Serviço
+    Repository-->>Service: Serviço atualizado
+    Service-->>Controller: Sucesso
+    Controller-->>Usuario: 200 OK
+
+
+
+
+```
+
 ---
-## > Casos de Uso 
+
+## > Casos de Uso
 
 1. Contador registra-se → obtém token JWT
 2. Cadastra clientes → valida CPF único
@@ -68,7 +244,7 @@ src/
 
 - .NET 8 SDK
 - SQL Server LocalDB ou Express
-- Docker *(para futuro uso)*
+- Docker _(para futuro uso)_
 - Visual Studio, VS Code ou IDE de sua preferência
 
 ---
@@ -90,7 +266,7 @@ dotnet ef database update --project src/ContabiliHub.Infrastructure --startup-pr
 dotnet run --project src/ContabiliHub.API
 ```
 
-- Acesse o **Swagger**: [https://localhost:7165/swagger](https://localhost:7165/swagger)  
+- Acesse o **Swagger**: [https://localhost:7165/swagger](https://localhost:7165/swagger)
 - Por padrão, o banco será criado como `ContabiliHubDb` na instância SQL definida em `appsettings.json`.
 
 ---
@@ -121,7 +297,9 @@ Content-Type: application/json
   "senha": "senha123"
 }
 ```
-**Resposta:**  
+
+**Resposta:**
+
 ```json
 {
   "token": "<jwt_token>"
@@ -172,10 +350,11 @@ Authorization: Bearer <jwt_token>
 ## > Documentação Interativa
 
 Acesse o **Swagger UI** para explorar e testar todos os endpoints:
+
 - [https://localhost:7165/swagger](https://localhost:7165/swagger)
 
-  
 ---
+
 ![SwaggerUI](https://i.imgur.com/NPRI2MY.png)
 ![SwaggerUI](https://i.imgur.com/sUxpLTc.png)
 ![SwaggerUI](https://i.imgur.com/qq6CGYF.png)
@@ -183,7 +362,6 @@ Acesse o **Swagger UI** para explorar e testar todos os endpoints:
 ---
 
 ## > Roadmap / TODO
-
 
 - ✅ API funcionalmente completa
 - 🔄 Testes unitários automatizados
@@ -199,7 +377,7 @@ Acesse o **Swagger UI** para explorar e testar todos os endpoints:
 - Siga o padrão de arquitetura do projeto
 - Sempre crie uma interface antes da implementação de serviço/repositório
 - Commits semânticos (`feat:`, `fix:`, `refactor:`, etc)
-- Utilize DTOs nos controllers  
+- Utilize DTOs nos controllers
 - Teste localmente antes de enviar PRs
 
 ---
