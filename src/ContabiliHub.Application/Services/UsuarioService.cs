@@ -65,6 +65,12 @@ namespace ContabiliHub.Application.Services
             var key = _configuration["Jwt:Key"];
             var issuer = _configuration["Jwt:Issuer"];
 
+            var expiryInHoursStr = _configuration["Jwt:ExpiryInHours"];
+            var expiryHours = 6;
+            if (int.TryParse(expiryInHoursStr, out var parsed) && parsed > 0)
+                expiryHours = parsed;
+
+
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
@@ -79,7 +85,7 @@ namespace ContabiliHub.Application.Services
                 issuer: issuer,
                 audience: issuer,
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(6),
+                expires: DateTime.UtcNow.AddHours(expiryHours),
                 signingCredentials: credentials
             );
 
