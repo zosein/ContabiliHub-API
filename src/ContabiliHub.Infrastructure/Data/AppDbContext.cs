@@ -26,6 +26,8 @@ namespace ContabiliHub.Infrastructure.Data
                     .IsUnique();
                 entity.Property(c => c.Email)
                     .HasMaxLength(100);
+                entity.HasIndex(c => c.Email)
+                    .IsUnique();
                 entity.Property(c => c.Telefone)
                     .HasMaxLength(15);
                 entity.Property(c => c.Endereco)
