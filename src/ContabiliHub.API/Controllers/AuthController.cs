@@ -29,37 +29,13 @@ namespace ContabiliHub.API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult> Register([FromBody] UsuarioRegisterDto dto)
         {
-            //Validação usando sistema nativo
             var validationResult = _registerValidator.Validate(dto);
             if (!validationResult.IsValid)
-            {
-                return BadRequest(new
-                {
-                    message = "Dados inválidos.",
-                    errors = validationResult.Errors
-                });
-            }
+                return BadRequest(new { message = "Dados inválidos.", errors = validationResult.Errors });
 
-            try
-            {
-                var usuario = await _usuarioService.RegistrarAsync(dto);
+            var usuario = await _usuarioService.RegistrarAsync(dto);
 
-                return CreatedAtAction(
-                     nameof(Register),
-                     new { id = usuario.Id },
-                     new { message = "Usuário registrado com sucesso.", usuario.Email }
-                );
-            }
-
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
-
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = "Erro interno do servidor.", details = ex.Message });
-            }
+            return CreatedAtAction(nameof(Register), new { id = usuario.Id }, new { message = "Usuário registrado com sucesso.", usuario.Email });
         }
 
         /// <summary>
@@ -70,33 +46,12 @@ namespace ContabiliHub.API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult> Login([FromBody] UsuarioLoginDto dto)
         {
-            // Validação usando sistema nativo
             var validationResult = _loginValidator.Validate(dto);
             if (!validationResult.IsValid)
-            {
-                return BadRequest(new
-                {
-                    message = "Dados inválidos.",
-                    errors = validationResult.Errors
-                });
-            }
+                return BadRequest(new { message = "Dados inválidos.", errors = validationResult.Errors });
 
-            try
-            {
-                var token = await _usuarioService.LoginAsync(dto);
-
-                return Ok(new { token, message = "Login realizado com sucesso." });
-            }
-
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
-
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = "Erro interno do servidor.", details = ex.Message });
-            }
+            var token = await _usuarioService.LoginAsync(dto);
+            return Ok(new { token, message = "Login realizado com sucesso." });
         }
 
         /// <summary>
