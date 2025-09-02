@@ -27,6 +27,10 @@ namespace ContabiliHub.Domain.ValueObjects
 
         public static bool isValido(string digito)
         {
+            // Verificar se é null ou vazio primeiro
+            if (string.IsNullOrEmpty(digito))
+                return false;
+
             if (!CpfSomenteDigitos.IsMatch(digito))
                 return false;
 
@@ -37,6 +41,10 @@ namespace ContabiliHub.Domain.ValueObjects
             //calculo digito verificadores
             bool ChecaDigito(int tamanho)
             {
+                // Verifica se a string tem tamanho suficiente
+                if (digito.Length <= tamanho)
+                    return false;
+
                 int soma = 0;
                 for (int i = 0; i < tamanho; i++)
                     soma += (tamanho + 1 - i) * (digito[i] - '0');
@@ -45,7 +53,7 @@ namespace ContabiliHub.Domain.ValueObjects
                 return digito[tamanho] - '0' == (resto < 2 ? 0 : 11 - resto);
             }
 
-            return ChecaDigito(10) && ChecaDigito(11);
+            return ChecaDigito(9) && ChecaDigito(10);
         }
 
         public override string ToString() => Valor;
