@@ -364,7 +364,7 @@ Acesse o **Swagger UI** para explorar e testar todos os endpoints:
 ## > Roadmap / TODO
 
 - ✅ API funcionalmente completa
-- 🔄 Testes unitários automatizados
+- ✅ Testes unitários automatizados
 - 🔄 Containerização Docker
 - 🔄 Integração com e-mail para recibos
 - 🔄 Sistema de agendamento
