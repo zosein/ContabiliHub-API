@@ -266,7 +266,7 @@ dotnet ef database update --project src/ContabiliHub.Infrastructure --startup-pr
 dotnet run --project src/ContabiliHub.API
 ```
 
-- Acesse o **Swagger**: [https://localhost:7165/swagger](https://localhost:7165/swagger)
+- Acesse o **Swagger**: [https://localhost:{SUA_PORT}/swagger](https://localhost:{SUA_PORT}/swagger)
 - Por padrão, o banco será criado como `ContabiliHubDb` na instância SQL definida em `appsettings.json`.
 
 ---
@@ -351,7 +351,7 @@ Authorization: Bearer <jwt_token>
 
 Acesse o **Swagger UI** para explorar e testar todos os endpoints:
 
-- [https://localhost:7165/swagger](https://localhost:7165/swagger)
+- [https://localhost:{SUA_PORT}/swagger](https://localhost:{SUA_PORT}/swagger)
 
 ---
 
