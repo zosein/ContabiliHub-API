@@ -355,9 +355,9 @@ Acesse o **Swagger UI** para explorar e testar todos os endpoints:
 
 ---
 
-![SwaggerUI](https://i.imgur.com/NPRI2MY.png)
-![SwaggerUI](https://i.imgur.com/sUxpLTc.png)
-![SwaggerUI](https://i.imgur.com/qq6CGYF.png)
+![SwaggerUI](https://imgur.com/NPRI2MY.png)
+![SwaggerUI](https://imgur.com/sUxpLTc.png)
+![SwaggerUI](https://imgur.com/qq6CGYF.png)
 
 ---
 
